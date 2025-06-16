@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+<meta charset="UTF-8" />
+<title>Aktuálne počasie Bratislava</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 700px;
+    margin: 30px auto;
+    padding: 0 15px;
+    background: #f9fafb;
+    text-align: center;
+  }
+  h1 {
+    margin-bottom: 25px;
+  }
+  .weather-table {
+    display: table;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto 30px auto;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    background: white;
+    font-weight: 600;
+    font-size: 16px;
+    user-select: none;
+  }
+  .weather-row {
+    display: table-row;
+  }
+  .weather-cell {
+    display: table-cell;
+    padding: 14px 10px;
+    border-bottom: 1px solid #e0e6f1;
+    text-align: center;
+  }
+  .weather-header .weather-cell {
+    background: linear-gradient(90deg, #4a90e2, #007bff);
+    color: white;
+    font-size: 17px;
+    border-bottom: none;
+  }
+  .weather-values .weather-cell {
+    background: #f9fbff;
+  }
+  #resetBtn {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 12px rgba(0,123,255,0.4);
+    transition: background-color 0.3s ease;
+  }
+  #resetBtn:hover {
+    background: #0056b3;
+  }
+  iframe {
+    width: 100%;
+    height: 480px;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    transition: box-shadow 0.3s ease;
+  }
+  iframe:hover {
+    box-shadow: 0 12px 30px rgba(0,0,0,0.25);
+  }
+</style>
+</head>
+<body>
+
+<h1>Aktuálne počasie Bratislava - Medická záhrada</h1>
+
+<div class="weather-table">
+  <div class="weather-row weather-header">
+    <div class="weather-cell">Čas</div>
+    <div class="weather-cell">Teplota</div>
+    <div class="weather-cell">Vietor</div>
+    <div class="weather-cell">Vlhkosť</div>
+    <div class="weather-cell">Západ slnka</div>
+  </div>
+  <div class="weather-row weather-values" id="weatherData">
+    <div class="weather-cell" id="time">-</div>
+    <div class="weather-cell" id="temp">-</div>
+    <div class="weather-cell" id="wind">-</div>
+    <div class="weather-cell" id="humidity">-</div>
+    <div class="weather-cell" id="sunset">-</div>
+  </div>
+</div>
+
+<button id="resetBtn">Obnov pozíciu na pingpongový stôl</button>
+
+<iframe
+  id="mapFrame"
+  src="https://embed.windy.com/embed2.html?lat=48.15&lon=17.12367&zoom=16&level=surface&overlay=radar&product=ecmwf&metricWind=km%2Fh&metricTemp=%C2%B0C"
+  allowfullscreen
+  title="Mapa Bratislava - Pingpongový stôl">
+</iframe>
+
+<script>
+  const apiKey = '76d23704517ceace58082cf1a4a7e67d'; // sem vlož svoj OpenWeatherMap API kľúč
+  const lat = 48.146;
+  const lon = 17.107;
+
+  const resetBtn = document.getElementById('resetBtn');
+  const mapFrame = document.getElementById('mapFrame');
+
+  resetBtn.addEventListener('click', () => {
+    let url = new URL(mapFrame.src);
+    url.searchParams.set('lat', '48.15');
+    url.searchParams.set('lon', '17.12367');
+    mapFrame.src = url.toString();
+  });
+
+  async function fetchWeather() {
+    try {
+      const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=sk&appid=${apiKey}`);
+      if(!res.ok) throw new Error('Chyba načítania dát');
+      const data = await res.json();
+
+      // čas v HH:MM
+      const dt = new Date(data.dt * 1000);
+      const timeStr = dt.getHours().toString().padStart(2,'0') + ':' + dt.getMinutes().toString().padStart(2,'0');
+
+      // západ slnka
+      const sunset = new Date(data.sys.sunset * 1000);
+      const sunsetStr = sunset.getHours().toString().padStart(2,'0') + ':' + sunset.getMinutes().toString().padStart(2,'0');
+
+      document.getElementById('time').textContent = timeStr;
+      document.getElementById('temp').textContent = Math.round(data.main.temp) + ' °C';
+      document.getElementById('wind').textContent = Math.round(data.wind.speed * 3.6) + ' km/h ' + windDegToDir(data.wind.deg);
+      document.getElementById('humidity').textContent = data.main.humidity + ' %';
+      document.getElementById('sunset').textContent = sunsetStr;
+
+    } catch (error) {
+      console.error(error);
+      alert('Nepodarilo sa načítať počasie');
+    }
+  }
+
+  // konverzia stupňov na smer vetra slovne
+  function windDegToDir(deg) {
+    const dirs = ['S', 'SSV', 'SV', 'VSV', 'V', 'VJV', 'JV', 'JJV', 'J', 'JZJ', 'ZJ', 'ZZJ', 'Z', 'ZZS', 'ZS', 'SSZ'];
+    const index = Math.floor((deg + 11.25) / 22.5) % 16;
+    return dirs[index];
+  }
+
+  fetchWeather();
+</script>
+
+</body>
+</html>
