@@ -171,10 +171,8 @@
     const leaderboard = players.map(player => ({ player, ...stats[player] }));
     
     leaderboard.sort((a, b) => {
-      // 1. Získané sety
       if (b.setsWon !== a.setsWon) return b.setsWon - a.setsWon;
 
-      // 2. Vzájomné zápasy (Výhry a Sety)
       let aWinsH2H = 0, bWinsH2H = 0, aSetsH2H = 0, bSetsH2H = 0;
       const sortedNames = [a.player, b.player].sort();
       for (let i = 1; i <= 4; i++) {

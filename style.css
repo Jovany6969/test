@@ -1,4 +1,4 @@
-/* --- ZÁKLADNÉ PREMENNÉ PRE FARBY --- */
+/* --- ZÁKLADNÉ PREMENNÉ A RESET --- */
 :root {
   --bg-app: #f0f4f8;          
   --text-main: #2c3e50;       
@@ -12,6 +12,16 @@
   --border-light: #e1e8ed;
 }
 
+/* POISTKA PROTI POSÚVANIU NA MOBILE */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden; /* Toto zabráni lietaniu stránky doľava/doprava */
+}
+
 body { 
   margin: 0; 
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
@@ -21,9 +31,9 @@ body {
 }
 
 /* --- HLAVIČKA --- */
-header { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
+header { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; text-align: center; }
 header img { height: 50px; }
-h1 { font-size: 2em; text-transform: uppercase; letter-spacing: 1px; color: var(--table-head); margin: 0; text-align: center; }
+h1 { font-size: 1.8em; text-transform: uppercase; letter-spacing: 1px; color: var(--table-head); margin: 0; }
 h2, h3 { text-align: center; color: var(--table-head); margin: 30px 0 15px 0; font-size: 1.4em; }
 
 /* --- FORMULÁR NA ZÁPIS --- */
@@ -40,7 +50,8 @@ h2, h3 { text-align: center; color: var(--table-head); margin: 30px 0 15px 0; fo
 }
 .match-form select:focus, .match-form input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(52,152,219,0.2); }
 .match-form select { cursor: pointer; font-weight: bold; flex: 1; min-width: 120px; }
-.match-form input[type="number"] { width: 60px; }
+.match-form input[type="number"] { width: 70px; }
+.score-inputs { display: flex; align-items: center; justify-content: center; gap: 10px; }
 
 /* --- TLAČIDLÁ --- */
 button { font-family: inherit; }
@@ -48,7 +59,7 @@ button { font-family: inherit; }
 .btn-save:hover { background-color: var(--primary-hover); transform: translateY(-2px); }
 .btn-delete { padding: 6px 12px; background-color: #fceceb; color: var(--danger); border: 1px solid #fadbd8; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 12px; transition: 0.2s; }
 .btn-delete:hover { background-color: var(--danger); color: white; }
-.btn-reset-all { padding: 12px 24px; background-color: #fceceb; color: var(--danger); border: 1px solid #fadbd8; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; display: block; margin: 50px auto; transition: 0.2s; }
+.btn-reset-all { padding: 12px 24px; background-color: #fceceb; color: var(--danger); border: 1px solid #fadbd8; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; display: block; margin: 50px auto; transition: 0.2s; width: 100%; max-width: 300px; text-align: center;}
 .btn-reset-all:hover { background-color: var(--danger); color: white; }
 
 /* --- ODKAZY NA HRÁČOV A POČASIE --- */
@@ -56,23 +67,23 @@ ul.player-links { list-style-type: none; padding: 0; display: flex; flex-wrap: w
 ul.player-links li a, .back-link { 
   text-decoration: none; color: var(--text-main); background-color: #ffffff; 
   padding: 10px 18px; border-radius: 20px; font-weight: bold; font-size: 1em; 
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05); transition: 0.2s; border: 1px solid var(--border-light);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05); transition: 0.2s; border: 1px solid var(--border-light); display: block;
 }
 ul.player-links li a:hover, .back-link:hover { background-color: var(--primary); color: white; border-color: var(--primary); transform: translateY(-2px); }
 .back-link-container { text-align: center; margin-bottom: 20px; }
 
-/* Tlačidlo pre počasie */
 .weather-btn {
   display: inline-block; padding: 14px 28px; background-color: var(--table-head); 
   color: white; text-decoration: none; border-radius: 30px; font-weight: bold; 
-  font-size: 1.1em; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: 0.2s;
+  font-size: 1.1em; box-shadow: 0 4px 10px rgba(0,0,0,0.15); transition: 0.2s; text-align: center;
 }
 .weather-btn:hover { background-color: var(--primary); transform: translateY(-2px); color: white; }
 
 /* --- RESPONSÍVNE TABUĽKY --- */
 .table-wrapper {
-  width: 100%; max-width: 900px; margin: 0 auto 30px auto;
+  width: 100%; margin: 0 auto 30px auto;
   overflow-x: auto; background: #ffffff; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  -webkit-overflow-scrolling: touch; /* Hladké posúvanie na iPhone */
 }
 
 table.main-table { width: 100%; border-collapse: collapse; min-width: 500px; }
@@ -92,12 +103,11 @@ tr.rank-3 td { background-color: #f2c09d !important; font-weight: bold; color: #
 .badge-w { background-color: var(--success); }
 .badge-l { background-color: var(--danger); }
 
-/* --- OSOBNÁ ŠTATISTIKA (Profil) --- */
-.stats-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; max-width: 800px; margin: 0 auto 30px auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-.stat-box { text-align: center; padding: 10px 15px; background: #f8fafc; border-radius: 8px; min-width: 80px; }
-.stat-box span { display: block; font-size: 1.6em; font-weight: bold; color: var(--primary); margin-top: 5px;}
+/* --- OSOBNÁ ŠTATISTIKA A MRIEŽKA (Profil) --- */
+.stats-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; max-width: 800px; margin: 0 auto 30px auto; background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+.stat-box { text-align: center; padding: 10px; background: #f8fafc; border-radius: 8px; flex: 1; min-width: 70px; }
+.stat-box span { display: block; font-size: 1.4em; font-weight: bold; color: var(--primary); margin-top: 5px;}
 
-/* --- MRIEŽKA PRE PROFIL HRÁČA (Grid) --- */
 .profile-tables-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
 .profile-table { width: 100%; border-collapse: separate; border-spacing: 0; background-color: #ffffff; border: 1px solid var(--border-light); border-radius: 10px; overflow: hidden; box-shadow: 0 3px 10px rgba(0,0,0,0.03); }
 .profile-table th.opp-name { background-color: var(--card-header); color: var(--text-main); padding: 12px; font-size: 1.1em; text-align: center; border-bottom: 1px solid #c0ccd6; }
@@ -109,18 +119,24 @@ tr.rank-3 td { background-color: #f2c09d !important; font-weight: bold; color: #
 .score-box { display: inline-block; padding: 6px 12px; border: 1px solid var(--border-light); border-radius: 6px; background: #fff; min-width: 40px; }
 .empty-slot { color: #bdc3c7; font-style: italic; font-weight: normal; font-size: 0.9em; }
 
-/* --- ÚPRAVY PRE MOBILY --- */
-@media (max-width: 600px) {
-  .match-form { flex-direction: column; align-items: stretch; padding: 15px; }
-  .match-form select, .match-form input[type="date"] { width: 100%; box-sizing: border-box; }
-  .match-form input[type="number"] { width: 48%; }
-  .score-inputs { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-  .btn-save { max-width: 100%; }
-  h1 { font-size: 1.6em; }
-}
-
 /* --- POČASIE ŠPECIFICKÉ ŠTÝLY --- */
-.weather-box { max-width: 900px; margin: 0 auto 30px auto; background: #ffffff; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-.weather-box iframe { border-radius: 8px; width: 100%; }
-.weather-title { text-align: center; color: var(--table-head); margin-bottom: 10px; }
-.weather-subtitle { text-align: center; color: var(--text-muted); margin-bottom: 30px; font-style: italic; }
+.weather-box { width: 100%; max-width: 900px; margin: 0 auto 30px auto; background: #ffffff; padding: 15px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); overflow: hidden; }
+.weather-box iframe { border-radius: 8px; width: 100%; max-width: 100%; }
+.weather-title { text-align: center; color: var(--table-head); margin-bottom: 10px; font-size: 1.2em; }
+
+/* --- VYLADENIE PRE MOBILY --- */
+@media (max-width: 600px) {
+  body { padding: 10px; }
+  h1 { font-size: 1.5em; }
+  
+  .match-form { flex-direction: column; align-items: stretch; padding: 15px; }
+  .match-form select, .match-form input[type="date"] { width: 100%; }
+  
+  .score-inputs { display: flex; justify-content: center; width: 100%; gap: 15px; }
+  .match-form input[type="number"] { flex: 1; max-width: 100px; } /* Sety budú na mobile rovnomerne veľké */
+  
+  .btn-save { max-width: 100%; }
+  
+  /* Tlačidlá na mobil prispôsobíme, aby nevytekali */
+  .weather-btn { display: block; width: 100%; max-width: 300px; margin: 0 auto; font-size: 1em; }
+}
