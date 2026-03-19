@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Pingpong - Centrálny zápis</title>
+  <title>Pingpong - Centrálny zápis (TEST)</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
     <img src="logo2.png" alt="Logo ligy">
-    <h1>Pingpong Liga</h1>
+    <h1>Pingpong Liga (TEST)</h1>
   </header>
 
   <div class="match-form">
@@ -51,11 +51,11 @@
     <table id="leaderboard-table" class="main-table">
       <thead>
         <tr>
-          <th>Hráč</th>
-          <th>Sety (Body)</th>
-          <th>Výhry</th>
-          <th>Prehry</th>
-          <th>Forma</th>
+          <th class="player-name-col">Hráč</th>
+          <th class="sets-col">Sety (Body)</th>
+          <th class="wins-col">Výhry</th>
+          <th class="losses-col">Prehry</th>
+          <th class="forma-col">Forma</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -111,12 +111,15 @@
     const p1 = document.getElementById('player1').value;
     const p2 = document.getElementById('player2').value;
     const date = document.getElementById('match-date').value;
-    const s1 = parseInt(document.getElementById('score1').value);
-    const s2 = parseInt(document.getElementById('score2').value);
+    const s1Value = document.getElementById('score1').value;
+    const s2Value = document.getElementById('score2').value;
 
     if (!p1 || !p2) { alert("Prosím, vyber oboch hráčov!"); return; }
     if (p1 === p2) { alert("Hráč nemôže hrať sám so sebou!"); return; }
-    if (isNaN(s1) || isNaN(s2)) { alert("Prosím, zadaj platné skóre."); return; }
+    if (s1Value === "" || s2Value === "") { alert("Prosím, zadaj platné skóre."); return; }
+
+    const s1 = parseInt(s1Value);
+    const s2 = parseInt(s2Value);
 
     const isValidScore = (s1 === 3 && s2 >= 0 && s2 < 3) || (s2 === 3 && s1 >= 0 && s1 < 3);
     if (!isValidScore) { alert("Neplatný výsledok! Hrá sa na 3 víťazné sety."); return; }
@@ -147,10 +150,11 @@
     
     localStorage.setItem('pingpong_test_data', JSON.stringify(globalData));
 
+    // Reset dropdown mení na predvolenú hodnotu
     document.getElementById('player1').selectedIndex = 0;
     document.getElementById('player2').selectedIndex = 0;
-    document.getElementById('score1').value = '';
-    document.getElementById('score2').value = '';
+    document.getElementById('score1').selectedIndex = 0;
+    document.getElementById('score2').selectedIndex = 0;
     
     refreshData();
   }
@@ -185,8 +189,10 @@
     const leaderboard = players.map(player => ({ player, ...stats[player] }));
     
     leaderboard.sort((a, b) => {
+      // 1. Získané sety
       if (b.setsWon !== a.setsWon) return b.setsWon - a.setsWon;
 
+      // 2. Vzájomné zápasy
       let aWinsH2H = 0, bWinsH2H = 0, aSetsH2H = 0, bSetsH2H = 0;
       const sortedNames = [a.player, b.player].sort();
       for (let i = 1; i <= 4; i++) {
@@ -230,12 +236,12 @@
       });
       formaHtml += `</div>`;
 
-      // OPRAVA: Všetky čísla sú teraz rovnako veľké a tučné
+      // OPRAVA: Všetky čísla sú tučné a stredovo zarovnané (nastavené v CSS)
       tr.innerHTML = `
-        <td style="font-size: 1.1em;"><strong>${stat.player}</strong>${medal}</td>
-        <td style="font-weight: bold;">${stat.setsWon}</td>
-        <td style="font-weight: bold;">${stat.wins}</td>
-        <td style="font-weight: bold;">${stat.losses}</td>
+        <td><div class="player-info"><div class="player-medal">${medal}</div><div class="player-name"><strong>${stat.player}</strong></div></div></td>
+        <td>${stat.setsWon}</td>
+        <td>${stat.wins}</td>
+        <td>${stat.losses}</td>
         <td>${formaHtml}</td>
       `;
       tbody.appendChild(tr);
