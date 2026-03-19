@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Pingpong - Profil hráča</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="back-link-container">
+    <a href="index.html" class="back-link">← Späť na Tabuľku</a>
+  </div>
+  
+  <h1 id="player-title"></h1>
+  
+  <div class="stats-container">
+    <div class="stat-box">Zápasy<br><span id="matches-played">0</span></div>
+    <div class="stat-box">Výhry<br><span id="wins">0</span></div>
+    <div class="stat-box">Prehry<br><span id="losses">0</span></div>
+    <div class="stat-box">Sety +<br><span id="sets-won">0</span></div>
+    <div class="stat-box">Sety -<br><span id="sets-lost">0</span></div>
+  </div>
+
+  <h2>Rozpis zápasov</h2>
+  <div class="profile-tables-grid" id="match-tables-container"></div>
+
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const currentPlayer = urlParams.get('meno');
+  const allPlayers = ["Alex", "Maxo", "Jašo", "Miňo", "Pali", "Kali", "Erik", "Pišta"];
+
+  if (!currentPlayer || !allPlayers.includes(currentPlayer)) {
+    window.location.href = "index.html";
+  }
+
+  document.getElementById("player-title").textContent = currentPlayer;
+
+  const opponents = allPlayers.filter(p => p !== currentPlayer);
+  const container = document.getElementById("match-tables-container");
+  let globalData = JSON.parse(localStorage.getItem('pingpong_test_data')) || {};
+
+  let totalMatches = 0, totalWins = 0, totalLosses = 0, totalSetsWon = 0, totalSetsLost = 0;
+
+  opponents.forEach(opponent => {
+    const table = document.createElement("table");
+    table.className = "profile-table";
+    
+    // TU JE ZMENA: Namiesto "Výsledok (výhry:prehry)" je tam "Skóre (Ja : Súper)"
+    let html = `
+      <thead>
+        <tr>
+          <th colspan="2" class="opp-name">${opponent}</th>
+        </tr>
+        <tr>
+          <th class="sub-head">Dátum</th>
+          <th class="sub-head">Skóre<br><small>(Ja : Súper)</small></th>
+        </tr>
+      </thead>
+      <tbody>
+    `;
+    
+    const sorted = [currentPlayer, opponent].sort();
+    
+    for (let i = 1; i <= 4; i++) {
+      const key = `${sorted[0]}_${sorted[1]}_${i}`;
+      const match = globalData[key];
+      
+      if (match && match.score1 !== null) {
+        let myScore = match.player1 === currentPlayer ? match.score1 : match.score2;
+        let oppScore = match.player1 === currentPlayer ? match.score2 : match.score1;
+        
+        let displayDate = match.date;
+        if(match.date) {
+          const d = new Date(match.date);
+          displayDate = `${String(d.getDate()).padStart(2, '0')}. ${String(d.getMonth() + 1).padStart(2, '0')}.`;
+        }
+
+        let color = myScore > oppScore ? "var(--success)" : "var(--danger)";
+
+        html += `
+          <tr>
+            <td><span class="score-box">${displayDate} 📅</span></td>
+            <td><span class="score-box" style="font-weight: bold; color: ${color};">${myScore} : ${oppScore}</span></td>
+          </tr>
+        `;
+
+        totalMatches++;
+        totalSetsWon += myScore;
+        totalSetsLost += oppScore;
+        if (myScore > oppScore) totalWins++;
+        else totalLosses++;
+
+      } else {
+        html += `
+          <tr>
+            <td><span class="score-box empty-slot">dd. mm. 📅</span></td>
+            <td><span class="score-box empty-slot">napr. 3:1</span></td>
+          </tr>
+        `;
+      }
+    }
+
+    html += `</tbody>`;
+    table.innerHTML = html;
+    container.appendChild(table);
+  });
+
+  document.getElementById("matches-played").textContent = totalMatches;
+  document.getElementById("wins").textContent = totalWins;
+  document.getElementById("losses").textContent = totalLosses;
+  document.getElementById("sets-won").textContent = totalSetsWon;
+  document.getElementById("sets-lost").textContent = totalSetsLost;
+
+</script>
+</body>
+</html>
