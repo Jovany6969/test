@@ -38,7 +38,7 @@ h2, h3 { text-align: center; color: var(--table-head); margin: 30px 0 15px 0; fo
   display: flex; justify-content: center; align-items: center; gap: 10px; 
   max-width: 800px; margin: 0 auto 25px auto; 
   background: #ffffff; padding: 20px; border-radius: 12px; 
-  box-shadow: 0 5px 15px rgba(0,0,0,0.05); flex-wrap: wrap;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.05); flex-wrap: wrap; width: 100%;
 }
 .match-form select, .match-form input { 
   padding: 12px; border: 1px solid var(--border-light); border-radius: 8px; 
@@ -47,7 +47,9 @@ h2, h3 { text-align: center; color: var(--table-head); margin: 30px 0 15px 0; fo
 }
 .match-form select:focus, .match-form input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(52,152,219,0.2); }
 .match-form select { cursor: pointer; font-weight: bold; flex: 1; min-width: 120px; }
-.match-form input[type="number"] { width: 70px; }
+
+/* Nové roletky pre skóre */
+.score-dropdown { width: 70px; min-width: 70px !important; flex: none !important; font-size: 18px !important; }
 .score-inputs { display: flex; align-items: center; justify-content: center; gap: 10px; }
 
 /* --- TLAČIDLÁ --- */
@@ -78,7 +80,7 @@ ul.player-links li a:hover, .back-link:hover { background-color: var(--primary);
 
 /* --- RESPONSÍVNE TABUĽKY --- */
 .table-wrapper {
-  width: 100%; max-width: 800px; /* Zúžené pre lepšie zobrazenie na PC */
+  width: 100%; max-width: 800px; 
   margin: 0 auto 30px auto; overflow-x: auto; 
   background: #ffffff; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
   -webkit-overflow-scrolling: touch; 
@@ -94,7 +96,6 @@ tr.rank-1 td { background-color: #ffe680 !important; font-weight: bold; color: #
 tr.rank-2 td { background-color: #d8e0e8 !important; font-weight: bold; color: #1a252f !important; }
 tr.rank-3 td { background-color: #f2c09d !important; font-weight: bold; color: #5a2c0c !important; }
 
-/* Forma (W/L) */
 .forma-container { display: flex; gap: 4px; justify-content: center; align-items: center; flex-wrap: nowrap; }
 .badge-forma { width: 22px; height: 22px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; color: white; }
 .badge-w { background-color: var(--success); }
@@ -102,7 +103,8 @@ tr.rank-3 td { background-color: #f2c09d !important; font-weight: bold; color: #
 
 /* --- OSOBNÁ ŠTATISTIKA A MRIEŽKA (Profil) --- */
 .stats-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; max-width: 800px; margin: 0 auto 30px auto; background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-.stat-box { text-align: center; padding: 10px; background: #f8fafc; border-radius: 8px; flex: 1; min-width: 70px; }
+/* OPRAVA: max-width zamedzí roztiahnutiu posledného políčka na celú šírku */
+.stat-box { text-align: center; padding: 10px; background: #f8fafc; border-radius: 8px; flex: 1 1 calc(30% - 10px); min-width: 70px; max-width: 130px; }
 .stat-box span { display: block; font-size: 1.4em; font-weight: bold; color: var(--primary); margin-top: 5px;}
 
 .profile-tables-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
@@ -115,24 +117,26 @@ tr.rank-3 td { background-color: #f2c09d !important; font-weight: bold; color: #
 .score-box { display: inline-block; padding: 6px 12px; border: 1px solid var(--border-light); border-radius: 6px; background: #fff; min-width: 40px; }
 .empty-slot { color: #bdc3c7; font-style: italic; font-weight: normal; font-size: 0.9em; }
 
-/* --- POČASIE A ZÁPAD SLNKA --- */
+/* --- POČASIE --- */
 .weather-box { width: 100%; max-width: 900px; margin: 0 auto 30px auto; background: #ffffff; padding: 15px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); overflow: hidden; }
-.weather-box iframe { border-radius: 8px; width: 100%; max-width: 100%; }
 .weather-title { text-align: center; color: var(--table-head); margin-bottom: 10px; font-size: 1.2em; }
 .sunset-box { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); color: white; text-align: center; padding: 25px; border-radius: 12px; border: none; box-shadow: 0 6px 20px rgba(253, 160, 133, 0.4); }
 
-/* --- VYLADENIE PRE MOBILY (Tu je kúzlo kompaktnosti) --- */
+/* Kontajner pre scrollovanie iframe */
+.weather-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.weather-scroll iframe { border-radius: 8px; min-width: 700px; /* Toto umožní scrollovanie na malom mobile */ }
+
+/* --- VYLADENIE PRE MOBILY --- */
 @media (max-width: 600px) {
   body { padding: 10px; }
   h1 { font-size: 1.5em; }
-  .match-form { flex-direction: column; align-items: stretch; padding: 15px; }
-  .match-form select, .match-form input[type="date"] { width: 100%; }
-  .score-inputs { display: flex; justify-content: center; width: 100%; gap: 15px; }
-  .match-form input[type="number"] { flex: 1; max-width: 100px; } 
+  
+  .match-form { flex-direction: column; align-items: stretch; padding: 15px; width: 100%; box-sizing: border-box; }
+  .match-form select, .match-form input[type="date"] { width: 100%; box-sizing: border-box; }
+  .score-inputs { display: flex; justify-content: center; width: 100%; gap: 10px; }
   .btn-save { max-width: 100%; }
   .weather-btn { display: block; width: 100%; max-width: 300px; margin: 0 auto; font-size: 1em; }
   
-  /* Zmenšenie tabuľky, aby sa zmestila na mobil */
   table.main-table th, table.main-table td { padding: 8px 4px; font-size: 0.85em; }
   .badge-forma { width: 16px; height: 16px; font-size: 9px; border-radius: 3px; }
   .forma-container { gap: 2px; }

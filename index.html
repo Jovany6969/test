@@ -17,9 +17,23 @@
     <select id="player1"></select>
     
     <div class="score-inputs">
-      <input type="number" id="score1" min="0" max="3" placeholder="Sety">
+      <select id="score1" class="score-dropdown">
+        <option value="" disabled selected>-</option>
+        <option value="0">0</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+      </select>
+      
       <span style="font-weight: bold; font-size: 1.2em; color: #7f8c8d;">:</span>
-      <input type="number" id="score2" min="0" max="3" placeholder="Sety">
+      
+      <select id="score2" class="score-dropdown">
+        <option value="" disabled selected>-</option>
+        <option value="0">0</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+      </select>
     </div>
     
     <select id="player2"></select>
@@ -216,11 +230,12 @@
       });
       formaHtml += `</div>`;
 
+      // OPRAVA: Všetky čísla sú teraz rovnako veľké a tučné
       tr.innerHTML = `
         <td style="font-size: 1.1em;"><strong>${stat.player}</strong>${medal}</td>
-        <td style="font-weight: bold; font-size: 1.2em; color: var(--primary);">${stat.setsWon}</td>
-        <td>${stat.wins}</td>
-        <td>${stat.losses}</td>
+        <td style="font-weight: bold;">${stat.setsWon}</td>
+        <td style="font-weight: bold;">${stat.wins}</td>
+        <td style="font-weight: bold;">${stat.losses}</td>
         <td>${formaHtml}</td>
       `;
       tbody.appendChild(tr);
