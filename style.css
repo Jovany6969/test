@@ -12,14 +12,11 @@
   --border-light: #e1e8ed;
 }
 
-/* POISTKA PROTI POSÚVANIU NA MOBILE */
-*, *::before, *::after {
-  box-sizing: border-box;
-}
+*, *::before, *::after { box-sizing: border-box; }
 
 html, body {
   max-width: 100vw;
-  overflow-x: hidden; /* Toto zabráni lietaniu stránky doľava/doprava */
+  overflow-x: hidden; 
 }
 
 body { 
@@ -81,24 +78,24 @@ ul.player-links li a:hover, .back-link:hover { background-color: var(--primary);
 
 /* --- RESPONSÍVNE TABUĽKY --- */
 .table-wrapper {
-  width: 100%; margin: 0 auto 30px auto;
-  overflow-x: auto; background: #ffffff; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-  -webkit-overflow-scrolling: touch; /* Hladké posúvanie na iPhone */
+  width: 100%; max-width: 800px; /* Zúžené pre lepšie zobrazenie na PC */
+  margin: 0 auto 30px auto; overflow-x: auto; 
+  background: #ffffff; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+  -webkit-overflow-scrolling: touch; 
 }
 
-table.main-table { width: 100%; border-collapse: collapse; min-width: 500px; }
-table.main-table th { background-color: var(--table-head); color: #ffffff; padding: 15px; text-transform: uppercase; font-size: 0.85em; letter-spacing: 1px; white-space: nowrap; }
-table.main-table td { padding: 15px; text-align: center; border-bottom: 1px solid var(--border-light); font-size: 0.95em; }
+table.main-table { width: 100%; border-collapse: collapse; min-width: 100%; }
+table.main-table th { background-color: var(--table-head); color: #ffffff; padding: 12px; text-transform: uppercase; font-size: 0.85em; letter-spacing: 1px; }
+table.main-table td { padding: 12px; text-align: center; border-bottom: 1px solid var(--border-light); font-size: 0.95em; }
 table.main-table tr:hover { background-color: #f8fafc; }
 table.main-table tr:last-child td { border-bottom: none; }
 
-/* --- VÝRAZNEJŠIE MEDAILY V TABUĽKE --- */
 tr.rank-1 td { background-color: #ffe680 !important; font-weight: bold; color: #4a3a00 !important; }
 tr.rank-2 td { background-color: #d8e0e8 !important; font-weight: bold; color: #1a252f !important; }
 tr.rank-3 td { background-color: #f2c09d !important; font-weight: bold; color: #5a2c0c !important; }
 
 /* Forma (W/L) */
-.forma-container { display: flex; gap: 4px; justify-content: center; align-items: center; }
+.forma-container { display: flex; gap: 4px; justify-content: center; align-items: center; flex-wrap: nowrap; }
 .badge-forma { width: 22px; height: 22px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 11px; color: white; }
 .badge-w { background-color: var(--success); }
 .badge-l { background-color: var(--danger); }
@@ -115,28 +112,28 @@ tr.rank-3 td { background-color: #f2c09d !important; font-weight: bold; color: #
 .profile-table th.sub-head:first-child { border-right: 1px solid var(--border-light); }
 .profile-table td { padding: 12px 10px; text-align: center; border-bottom: 1px solid #f0f4f8; font-size: 0.95em; }
 .profile-table td:first-child { border-right: 1px solid var(--border-light); color: var(--text-muted); font-weight: 600; }
-
 .score-box { display: inline-block; padding: 6px 12px; border: 1px solid var(--border-light); border-radius: 6px; background: #fff; min-width: 40px; }
 .empty-slot { color: #bdc3c7; font-style: italic; font-weight: normal; font-size: 0.9em; }
 
-/* --- POČASIE ŠPECIFICKÉ ŠTÝLY --- */
+/* --- POČASIE A ZÁPAD SLNKA --- */
 .weather-box { width: 100%; max-width: 900px; margin: 0 auto 30px auto; background: #ffffff; padding: 15px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); overflow: hidden; }
 .weather-box iframe { border-radius: 8px; width: 100%; max-width: 100%; }
 .weather-title { text-align: center; color: var(--table-head); margin-bottom: 10px; font-size: 1.2em; }
+.sunset-box { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); color: white; text-align: center; padding: 25px; border-radius: 12px; border: none; box-shadow: 0 6px 20px rgba(253, 160, 133, 0.4); }
 
-/* --- VYLADENIE PRE MOBILY --- */
+/* --- VYLADENIE PRE MOBILY (Tu je kúzlo kompaktnosti) --- */
 @media (max-width: 600px) {
   body { padding: 10px; }
   h1 { font-size: 1.5em; }
-  
   .match-form { flex-direction: column; align-items: stretch; padding: 15px; }
   .match-form select, .match-form input[type="date"] { width: 100%; }
-  
   .score-inputs { display: flex; justify-content: center; width: 100%; gap: 15px; }
-  .match-form input[type="number"] { flex: 1; max-width: 100px; } /* Sety budú na mobile rovnomerne veľké */
-  
+  .match-form input[type="number"] { flex: 1; max-width: 100px; } 
   .btn-save { max-width: 100%; }
-  
-  /* Tlačidlá na mobil prispôsobíme, aby nevytekali */
   .weather-btn { display: block; width: 100%; max-width: 300px; margin: 0 auto; font-size: 1em; }
+  
+  /* Zmenšenie tabuľky, aby sa zmestila na mobil */
+  table.main-table th, table.main-table td { padding: 8px 4px; font-size: 0.85em; }
+  .badge-forma { width: 16px; height: 16px; font-size: 9px; border-radius: 3px; }
+  .forma-container { gap: 2px; }
 }
