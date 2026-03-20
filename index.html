@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Pingpong - Centrálny zápis</title>
   <link rel="stylesheet" href="style.css">
+  
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
   <header>
@@ -37,7 +40,7 @@
     </div>
     
     <select id="player2"></select>
-    <button class="btn-save" onclick="saveMatch()">Uložiť výsledok</button>
+    <button class="btn-save" id="save-btn" onclick="saveMatch()">Uložiť výsledok</button>
   </div>
 
   <ul class="player-links" id="player-links-container"></ul>
@@ -80,6 +83,19 @@
   <button class="btn-reset-all" onclick="resetAllData()">⚠️ Vymazať všetky výsledky</button>
 
 <script>
+  // 1. INICIALIZÁCIA FIREBASE S TVOJIMI KĽÚČMI
+  const firebaseConfig = {
+    apiKey: "AIzaSyBvjsbk35S43nORNCHfg4AJfVAxp3rr_gg",
+    authDomain: "ligapinec.firebaseapp.com",
+    projectId: "ligapinec",
+    storageBucket: "ligapinec.firebasestorage.app",
+    messagingSenderId: "1005675095277",
+    appId: "1:1005675095277:web:94ed61594ba1d088e1d8e4"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
   const players = ["Alex", "Maxo", "Jašo", "Miňo", "Pali", "Kali", "Erik", "Pišta"];
 
   function init() {
@@ -99,15 +115,17 @@
       linksContainer.appendChild(li);
     });
 
-    refreshData();
+    // 2. LIVE SYNCHRONIZÁCIA: Ak niekto iný uloží zápas, tu sa to okamžite prekreslí!
+    db.collection("zapas").onSnapshot((snapshot) => {
+      let matchData = {};
+      snapshot.forEach((doc) => {
+        matchData[doc.id] = doc.data();
+      });
+      drawTables(matchData);
+    });
   }
 
-  function refreshData() {
-    loadLeaderboard();
-    loadRecentMatches();
-  }
-
-  function saveMatch() {
+  async function saveMatch() {
     const p1 = document.getElementById('player1').value;
     const p2 = document.getElementById('player2').value;
     const date = document.getElementById('match-date').value;
@@ -124,69 +142,90 @@
     const isValidScore = (s1 === 3 && s2 >= 0 && s2 < 3) || (s2 === 3 && s1 >= 0 && s1 < 3);
     if (!isValidScore) { alert("Neplatný výsledok! Zápas sa hrá na 3 víťazné sety (napr. 3:0, 3:1, 3:2)."); return; }
 
-    let globalData = JSON.parse(localStorage.getItem('pingpong_test_data')) || {};
+    const saveBtn = document.getElementById('save-btn');
+    saveBtn.disabled = true;
+    saveBtn.innerText = "Ukladám...";
+
     const sorted = [p1, p2].sort();
     const firstPlayer = sorted[0];
     const secondPlayer = sorted[1];
     const scoreForFirst = (firstPlayer === p1) ? s1 : s2;
     const scoreForSecond = (secondPlayer === p2) ? s2 : s1;
 
-    let matchNumber = 0;
-    for (let i = 1; i <= 4; i++) {
-      const key = `${firstPlayer}_${secondPlayer}_${i}`;
-      if (!globalData[key] || globalData[key].score1 === null) {
-        matchNumber = i; 
-        break;
+    try {
+      // Zistenie voľného čísla zápasu z Firebase
+      const snapshot = await db.collection("zapas").get();
+      let matchData = {};
+      snapshot.forEach(doc => matchData[doc.id] = doc.data());
+
+      let matchNumber = 0;
+      for (let i = 1; i <= 4; i++) {
+        const key = `${firstPlayer}_${secondPlayer}_${i}`;
+        if (!matchData[key]) {
+          matchNumber = i; 
+          break;
+        }
       }
+
+      if (matchNumber === 0) { 
+        alert(`⚠️ POZOR: Hráči ${p1} a ${p2} už odohrali všetky 4 vzájomné zápasy!`); 
+        saveBtn.disabled = false;
+        saveBtn.innerText = "Uložiť výsledok";
+        return; 
+      }
+
+      const matchKey = `${firstPlayer}_${secondPlayer}_${matchNumber}`;
+      
+      // Uloženie dokumentu do Firebase
+      await db.collection("zapas").doc(matchKey).set({
+        date: date, 
+        player1: firstPlayer, 
+        player2: secondPlayer, 
+        score1: scoreForFirst, 
+        score2: scoreForSecond, 
+        timestamp: firebase.firestore.FieldValue.serverTimestamp(), 
+        matchNumber: matchNumber 
+      });
+
+      // Reset formulára
+      document.getElementById('player1').selectedIndex = 0;
+      document.getElementById('player2').selectedIndex = 0;
+      document.getElementById('score1').selectedIndex = 0;
+      document.getElementById('score2').selectedIndex = 0;
+
+    } catch (error) {
+      console.error("Chyba pri ukladaní: ", error);
+      alert("Nastala chyba pri pripájaní na server.");
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.innerText = "Uložiť výsledok";
     }
-
-    if (matchNumber === 0) { 
-      alert(`⚠️ POZOR: Hráči ${p1} a ${p2} už odohrali všetky 4 vzájomné zápasy! Nemôžeš im pridať 5. zápas.`); 
-      return; 
-    }
-
-    const matchKey = `${firstPlayer}_${secondPlayer}_${matchNumber}`;
-    globalData[matchKey] = { 
-      date: date, player1: firstPlayer, player2: secondPlayer, 
-      score1: scoreForFirst, score2: scoreForSecond, 
-      timestamp: Date.now(), matchNumber: matchNumber 
-    };
-    
-    localStorage.setItem('pingpong_test_data', JSON.stringify(globalData));
-
-    document.getElementById('player1').selectedIndex = 0;
-    document.getElementById('player2').selectedIndex = 0;
-    document.getElementById('score1').selectedIndex = 0;
-    document.getElementById('score2').selectedIndex = 0;
-    
-    refreshData();
   }
 
-  function loadLeaderboard() {
-    const rawData = localStorage.getItem('pingpong_test_data');
-    const matchData = rawData ? JSON.parse(rawData) : {};
+  // Funkcia, ktorá sa volá automaticky pri každej zmene v databáze
+  function drawTables(matchData) {
     const stats = {};
-    
     players.forEach(p => stats[p] = { wins: 0, losses: 0, setsWon: 0, setsLost: 0, history: [] });
+    const matchesArray = [];
 
     for (const key in matchData) {
       const match = matchData[key];
-      if (match.score1 !== null && match.score2 !== null) {
-        stats[match.player1].setsWon += match.score1;
-        stats[match.player1].setsLost += match.score2;
-        stats[match.player2].setsWon += match.score2;
-        stats[match.player2].setsLost += match.score1;
+      matchesArray.push({ key: key, ...match });
 
-        let p1Won = match.score1 > match.score2;
-        let p2Won = match.score2 > match.score1;
+      stats[match.player1].setsWon += match.score1;
+      stats[match.player1].setsLost += match.score2;
+      stats[match.player2].setsWon += match.score2;
+      stats[match.player2].setsLost += match.score1;
 
-        if (p1Won) { stats[match.player1].wins++; stats[match.player2].losses++; } 
-        else if (p2Won) { stats[match.player2].wins++; stats[match.player1].losses++; }
+      let p1Won = match.score1 > match.score2;
+      let p2Won = match.score2 > match.score1;
 
-        let time = match.timestamp || 0;
-        stats[match.player1].history.push({ won: p1Won, time: time });
-        stats[match.player2].history.push({ won: p2Won, time: time });
-      }
+      if (p1Won) { stats[match.player1].wins++; stats[match.player2].losses++; } 
+      else if (p2Won) { stats[match.player2].wins++; stats[match.player1].losses++; }
+
+      let time = match.timestamp ? match.timestamp.toMillis() : 0;
+      stats[match.player1].history.push({ won: p1Won, time: time });
+      stats[match.player2].history.push({ won: p2Won, time: time });
     }
 
     const leaderboard = players.map(player => ({ player, ...stats[player] }));
@@ -199,7 +238,7 @@
       for (let i = 1; i <= 4; i++) {
         const matchKey = `${sortedNames[0]}_${sortedNames[1]}_${i}`;
         const match = matchData[matchKey];
-        if (match && match.score1 !== null && match.score2 !== null) {
+        if (match) {
           let scoreA = match.player1 === a.player ? match.score1 : match.score2;
           let scoreB = match.player1 === b.player ? match.score1 : match.score2;
           aSetsH2H += scoreA; bSetsH2H += scoreB;
@@ -237,7 +276,6 @@
       });
       formaHtml += `</div>`;
 
-      // Odstránené inline štýly, CSS (najmä farby) prevezme plnú kontrolu nad medailistami
       tr.innerHTML = `
         <td><div class="player-info"><div class="player-medal">${medal}</div><div class="player-name"><strong>${stat.player}</strong></div></div></td>
         <td>${stat.setsWon}</td>
@@ -247,29 +285,19 @@
       `;
       tbody.appendChild(tr);
     });
-  }
 
-  function loadRecentMatches() {
-    const rawData = localStorage.getItem('pingpong_test_data');
-    const matchData = rawData ? JSON.parse(rawData) : {};
-    const matchesArray = [];
-    
-    for (const key in matchData) {
-      if (matchData[key].score1 !== null) {
-        matchesArray.push({ key: key, ...matchData[key] });
-      }
-    }
-
+    // Vykreslenie posledných zápasov
     matchesArray.sort((a, b) => {
-      if (b.timestamp && a.timestamp) return b.timestamp - a.timestamp;
-      return new Date(b.date) - new Date(a.date);
+      let timeA = a.timestamp ? a.timestamp.toMillis() : 0;
+      let timeB = b.timestamp ? b.timestamp.toMillis() : 0;
+      return timeB - timeA;
     });
 
-    const tbody = document.querySelector('#recent-matches-table tbody');
-    tbody.innerHTML = '';
+    const recentTbody = document.querySelector('#recent-matches-table tbody');
+    recentTbody.innerHTML = '';
 
     if (matchesArray.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" style="color:#7f8c8d; padding: 20px;">Zatiaľ žiadne odohraté zápasy.</td></tr>';
+      recentTbody.innerHTML = '<tr><td colspan="4" style="color:#7f8c8d; padding: 20px;">Zatiaľ žiadne odohraté zápasy.</td></tr>';
       return;
     }
 
@@ -291,26 +319,37 @@
         <td><span class="score-box" style="font-weight:bold;">${match.score1} : ${match.score2}</span></td>
         <td><button class="btn-delete" onclick="deleteMatch('${match.key}')">Zmazať</button></td>
       `;
-      tbody.appendChild(tr);
+      recentTbody.appendChild(tr);
     });
   }
 
-  function deleteMatch(key) {
+  async function deleteMatch(key) {
     if (confirm("Naozaj chceš vymazať tento zápas?")) {
-      let globalData = JSON.parse(localStorage.getItem('pingpong_test_data')) || {};
-      delete globalData[key];
-      localStorage.setItem('pingpong_test_data', JSON.stringify(globalData));
-      refreshData();
+      try {
+        await db.collection("zapas").doc(key).delete();
+      } catch (error) {
+        console.error("Chyba pri mazaní: ", error);
+        alert("Zápas sa nepodarilo vymazať.");
+      }
     }
   }
 
-  function resetAllData() {
+  async function resetAllData() {
     const heslo = prompt("Pre vymazanie sezóny zadaj administrátorské heslo:");
     if (heslo === "488148") {
-      if (confirm("POZOR! Heslo je správne. Naozaj chceš vymazať ÚPLNE VŠETKY zápasy a začať novú sezónu? Táto akcia sa nedá vrátiť späť!")) {
-        localStorage.removeItem('pingpong_test_data');
-        refreshData();
-        alert("Všetky dáta boli vymazané. Môžeš začať zapisovať novú sezónu.");
+      if (confirm("POZOR! Heslo je správne. Naozaj chceš vymazať ÚPLNE VŠETKY zápasy v databáze?")) {
+        try {
+          const snapshot = await db.collection("zapas").get();
+          const batch = db.batch();
+          snapshot.docs.forEach((doc) => {
+            batch.delete(doc.ref);
+          });
+          await batch.commit();
+          alert("Všetky dáta boli úspešne vymazané zo servera.");
+        } catch(e) {
+          console.error(e);
+          alert("Chyba pri hromadnom mazaní dát!");
+        }
       }
     } else if (heslo !== null) { 
       alert("Nesprávne heslo! Dáta neboli vymazané.");
