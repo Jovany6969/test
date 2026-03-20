@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Pingpong - Centrálny zápis (TEST)</title>
+  <title>Pingpong - Centrálny zápis</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
     <img src="logo2.png" alt="Logo ligy">
-    <h1>Pingpong Liga (TEST)</h1>
+    <h1>Pingpong Liga</h1>
   </header>
 
   <div class="match-form">
@@ -51,11 +51,11 @@
     <table id="leaderboard-table" class="main-table">
       <thead>
         <tr>
-          <th class="player-name-col">Hráč</th>
-          <th class="sets-col">Sety (Body)</th>
-          <th class="wins-col">Výhry</th>
-          <th class="losses-col">Prehry</th>
-          <th class="forma-col">Forma</th>
+          <th class="player-name-col">HRÁČ</th>
+          <th class="sets-col">ZÍSKANÉ SETY</th>
+          <th class="wins-col">VÝHRY</th>
+          <th class="losses-col">PREHRY</th>
+          <th class="forma-col">FORMA</th>
         </tr>
       </thead>
       <tbody></tbody>
@@ -140,10 +140,9 @@
       }
     }
 
-    // OPRAVA: Poriadne ošetrenie a blokovanie 5. vzájomného zápasu
     if (matchNumber === 0) { 
       alert(`⚠️ POZOR: Hráči ${p1} a ${p2} už odohrali všetky 4 vzájomné zápasy! Nemôžeš im pridať 5. zápas.`); 
-      return; // Koniec, kód sa nespustí ďalej
+      return; 
     }
 
     const matchKey = `${firstPlayer}_${secondPlayer}_${matchNumber}`;
@@ -155,7 +154,6 @@
     
     localStorage.setItem('pingpong_test_data', JSON.stringify(globalData));
 
-    // Reset dropdown mení na predvolenú hodnotu "-"
     document.getElementById('player1').selectedIndex = 0;
     document.getElementById('player2').selectedIndex = 0;
     document.getElementById('score1').selectedIndex = 0;
@@ -194,10 +192,8 @@
     const leaderboard = players.map(player => ({ player, ...stats[player] }));
     
     leaderboard.sort((a, b) => {
-      // 1. Získané sety
       if (b.setsWon !== a.setsWon) return b.setsWon - a.setsWon;
 
-      // 2. Vzájomné zápasy
       let aWinsH2H = 0, bWinsH2H = 0, aSetsH2H = 0, bSetsH2H = 0;
       const sortedNames = [a.player, b.player].sort();
       for (let i = 1; i <= 4; i++) {
@@ -241,7 +237,7 @@
       });
       formaHtml += `</div>`;
 
-      // Čísla sú stredovo zarovnané pomocou CSS (table.main-table td:nth-child(n))
+      // Odstránené inline štýly, CSS (najmä farby) prevezme plnú kontrolu nad medailistami
       tr.innerHTML = `
         <td><div class="player-info"><div class="player-medal">${medal}</div><div class="player-name"><strong>${stat.player}</strong></div></div></td>
         <td>${stat.setsWon}</td>

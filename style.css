@@ -1,14 +1,14 @@
-/* Základné nastavenie tela a farieb aplikácie */
+/* --- ZÁKLADNÉ PREMENNÉ A RESET --- */
 :root {
   --bg-app: #f2f6f9;          
   --text-main: #34495e;       
   --text-muted: #7f8c8d;
   --primary: #3498db;         
   --primary-hover: #2980b9;
-  --success: #2ecc71;         
-  --danger: #e74c3c;          
+  --success: #4caf50; /* Odtieň zelenej z tvojho návrhu */      
+  --danger: #e53935;  /* Odtieň červenej z tvojho návrhu */         
   --card-header: #dbe4ec;     
-  --table-head: #2c3e50;      
+  --table-head: #2b6777; /* Tmavá modro-zelená z tvojho návrhu */     
   --border-light: #e1e8ed;
 }
 
@@ -27,7 +27,7 @@ body {
   padding: 15px; 
 }
 
-/* Hlavička a nadpisy stránky */
+/* --- HLAVIČKA --- */
 header { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; text-align: center; }
 header img { height: 50px; }
 h1 { font-size: 1.8em; text-transform: uppercase; letter-spacing: 1px; color: var(--table-head); margin: 0; }
@@ -39,7 +39,7 @@ h2, h3 { text-align: center; color: var(--table-head); margin: 30px 0 15px 0; fo
   max-width: 900px; margin: 0 auto 25px auto; 
   background: #ffffff; padding: 20px; border-radius: 12px; 
   box-shadow: 0 5px 15px rgba(0,0,0,0.05); 
-  flex-wrap: nowrap; /* Na PC zostane všetko v jednom riadku */
+  flex-wrap: nowrap; 
   width: 100%; box-sizing: border-box; overflow: hidden;
 }
 
@@ -51,20 +51,16 @@ h2, h3 { text-align: center; color: var(--table-head); margin: 30px 0 15px 0; fo
 
 .match-form select:focus, .match-form input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(52,152,219,0.2); }
 
-/* Dátum na PC */
-.match-form input[type="date"] { flex: none; width: auto; }
-
-/* Výber Hráčov na PC */
+.match-form input[type="date"] { flex: none; width: auto; max-width: 100%; }
 .match-form select:not(.score-dropdown) { cursor: pointer; font-weight: bold; flex: 1; min-width: 120px; max-width: 200px; }
 
-/* Blok pre skóre na PC */
 .score-inputs { display: flex; align-items: center; justify-content: center; gap: 10px; width: auto; flex: none; }
 .score-dropdown { 
   width: 65px !important; min-width: 65px !important; flex: none !important; 
   font-size: 18px !important; font-weight: bold !important; padding: 10px 0 !important; text-align-last: center; 
 }
 
-/* Dizajn tlačidiel */
+/* --- TLAČIDLÁ --- */
 button { font-family: inherit; }
 .btn-save { padding: 12px 20px; background-color: var(--primary); color: #fff; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; flex: none; white-space: nowrap; }
 .btn-save:hover { background-color: var(--primary-hover); transform: translateY(-2px); }
@@ -73,7 +69,7 @@ button { font-family: inherit; }
 .btn-reset-all { padding: 12px 24px; background-color: #fceceb; color: var(--danger); border: 1px solid #fadbd8; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; display: block; margin: 50px auto; transition: 0.2s; width: 100%; max-width: 300px; text-align: center; }
 .btn-reset-all:hover { background-color: var(--danger); color: white; }
 
-/* Odkazy na profily hráčov a stránku s počasím */
+/* Odkazy na profily hráčov */
 ul.player-links { list-style-type: none; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 10px 0 30px 0; }
 ul.player-links li a, .back-link { 
   text-decoration: none; color: var(--text-main); background-color: #ffffff; 
@@ -90,7 +86,7 @@ ul.player-links li a:hover, .back-link:hover { background-color: var(--primary);
 }
 .weather-btn:hover { background-color: var(--primary); transform: translateY(-2px); color: white; }
 
-/* Všeobecné nastavenia responsívnych tabuliek */
+/* --- RESPONSÍVNE TABUĽKY --- */
 .table-wrapper {
   width: 100%; max-width: 800px; 
   margin: 0 auto 30px auto; overflow-x: auto; 
@@ -99,7 +95,7 @@ ul.player-links li a:hover, .back-link:hover { background-color: var(--primary);
 }
 
 table.main-table { width: 100%; border-collapse: collapse; text-align: left;}
-table.main-table th { background-color: var(--table-head); color: #ffffff; padding: 12px; text-transform: uppercase; font-size: 0.85em; letter-spacing: 1px; }
+table.main-table th { background-color: var(--table-head); color: #ffffff; padding: 12px; text-transform: uppercase; font-size: 0.85em; letter-spacing: 1px; border-bottom: 2px solid var(--border-light); }
 table.main-table td { padding: 12px; border-bottom: 1px solid var(--border-light); }
 table.main-table tr:hover { background-color: #fbfcfe; }
 table.main-table tr:last-child td { border-bottom: none; }
@@ -110,25 +106,25 @@ table.main-table tr:last-child td { border-bottom: none; }
 .sets-col, .wins-col, .losses-col { width: 15%; }
 .forma-col { width: 15%; }
 
-table.main-table td:nth-child(2),
-table.main-table td:nth-child(3),
-table.main-table td:nth-child(4) { text-align: center; font-weight: bold; font-size: 1.1em; }
+table.main-table td:nth-child(2), table.main-table td:nth-child(3), table.main-table td:nth-child(4) { text-align: center; font-weight: bold; font-size: 1.1em; color: #1e4f5c; }
 
-tr.rank-1 td { background-color: #ffe680 !important; font-weight: bold; color: #4a3a00 !important; }
-tr.rank-2 td { background-color: #d8e0e8 !important; font-weight: bold; color: #1a252f !important; }
-tr.rank-3 td { background-color: #f2c09d !important; font-weight: bold; color: #5a2c0c !important; }
+/* FARBY Z TVOJHO NÁVRHU NA 1. OBRÁZKU */
+tr.rank-1 td { background-color: #ffeb55 !important; color: #1e4f5c !important; }
+tr.rank-2 td { background-color: #cdd1db !important; color: #1e4f5c !important; }
+tr.rank-3 td { background-color: #ce8e64 !important; color: #ffffff !important; }
+/* Vynútenie bielej farby pre mená a čísla na treťom mieste */
+tr.rank-3 td .player-name, tr.rank-3 td:nth-child(n) { color: #ffffff !important; }
 
 .forma-container { display: flex; gap: 6px; justify-content: start; align-items: center; flex-wrap: nowrap; padding: 0 10px;}
 .badge-forma { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 13px; color: white; }
 .badge-w { background-color: var(--success); }
 .badge-l { background-color: var(--danger); }
 
-/* Osobné štatistiky v profile hráča */
+/* --- ŠTATISTIKY V PROFILE --- */
 .stats-container { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; max-width: 800px; margin: 0 auto 30px auto; background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
 .stat-box { text-align: center; padding: 10px; background: #fbfcfe; border-radius: 8px; flex: 1 1 calc(30% - 10px); min-width: 70px; max-width: 130px; }
 .stat-box span { display: block; font-size: 1.4em; font-weight: bold; color: var(--primary); margin-top: 5px;}
 
-/* Mriežka tabuliek v profile hráča */
 .profile-tables-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
 .profile-table { width: 100%; border-collapse: separate; border-spacing: 0; background-color: #ffffff; border: 1px solid var(--border-light); border-radius: 10px; overflow: hidden; box-shadow: 0 3px 10px rgba(0,0,0,0.03); text-align: center;}
 .profile-table th.opp-name { background-color: var(--card-header); color: var(--text-main); padding: 12px; font-size: 1.1em; text-align: center; border-bottom: 1px solid #c0ccd6; }
@@ -139,46 +135,51 @@ tr.rank-3 td { background-color: #f2c09d !important; font-weight: bold; color: #
 .score-box { display: inline-block; padding: 6px 12px; border: 1px solid var(--border-light); border-radius: 6px; background: #fff; min-width: 40px; }
 .empty-slot { color: #bdc3c7; font-style: italic; font-weight: normal; font-size: 0.9em; }
 
-/* Dizajn pre stránku počasia a radary */
+/* --- POČASIE --- */
 .weather-box { width: 100%; max-width: 900px; margin: 0 auto 30px auto; background: #ffffff; padding: 15px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); overflow: hidden; }
 .weather-title { text-align: center; color: var(--table-head); margin-bottom: 10px; font-size: 1.2em; }
 .sunset-box { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); color: white; text-align: center; padding: 25px; border-radius: 12px; border: none; box-shadow: 0 6px 20px rgba(253, 160, 133, 0.4); }
-
-/* OPRAVA: Kontajner pre scrollovanie iframe počasia, aby sa dalo hýbať len radarom do strán */
 .weather-scroll { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-/* OPRAVA: Poriadne zvýšená minimálna šírka iframe pre hodinové počasie, aby nebol seknutý koniec */
 .weather-scroll iframe { border-radius: 8px; min-width: 1100px; height: 650px; }
 
-/* --- VYLADENIE PRE MOBILY (Keď je obrazovka užšia ako 800px) --- */
+/* --- VYLADENIE PRE MOBILY A OPRAVA WARNINGU VO VS CODE --- */
 @media (max-width: 800px) {
   body { padding: 10px; }
   h1 { font-size: 1.5em; }
   
-  /* OPRAVA (referencia image 6): Formulár na mobile MUSÍ byť stĺpec pod sebou */
-  .match-form { flex-direction: column !important; align-items: stretch; flex-wrap: wrap !important; padding: 20px 15px; }
+  .match-form { 
+    flex-direction: column !important; 
+    align-items: stretch; 
+    padding: 20px 15px; 
+    width: 100% !important; 
+    max-width: 100% !important; 
+  }
   
-  /* OPRAVA: Dátum a výbery hráčov na mobil sa neroztiahnu doprava, majú side padding */
-  .match-form select:not(.score-dropdown), .match-form input[type="date"] { max-width: 100%; width: 100%; box-sizing: border-box;}
+  /* OPRAVA: Odstránenie VS Code warningu pridaním "appearance" a "webkit-appearance" */
+  .match-form select:not(.score-dropdown), 
+  .match-form input[type="date"] { 
+    width: 100% !important; 
+    max-width: 100% !important; 
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    -webkit-appearance: none; 
+    appearance: none; 
+  }
   
-  /* OPRAVA: Zväčšené roletky skóre na mobile */
   .score-inputs { display: flex; justify-content: center; width: 100%; gap: 15px; margin: 5px 0; }
   .match-form select.score-dropdown { 
     width: 80px !important; 
     min-width: 80px !important; 
     padding: 10px 0 !important;
-    font-size: 22px !important; /* Poriadne veľké čísla pre palec */
+    font-size: 22px !important; 
   }
   
   .btn-save { max-width: 100%; width: 100%; }
-  
   .weather-btn { display: block; width: 100%; max-width: 300px; margin: 0 auto; font-size: 1em; }
   
-  /* Kompaktný režim pre tabuľku, aby sa zmestila celá na mobil */
   table.main-table th, table.main-table td { padding: 8px 4px; font-size: 0.8em; }
   table.main-table th { font-size: 0.75em; letter-spacing: 0.5px;}
-  table.main-table td:nth-child(2),
-  table.main-table td:nth-child(3),
-  table.main-table td:nth-child(4) { font-size: 1.1em; } /* Výrazné čísla aj na mobile */
+  table.main-table td:nth-child(2), table.main-table td:nth-child(3), table.main-table td:nth-child(4) { font-size: 1.1em; } 
   
   .forma-container { justify-content: center; padding: 0;}
   .badge-forma { width: 18px; height: 18px; font-size: 10px; border-radius: 4px; }
