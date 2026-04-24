@@ -18,6 +18,7 @@
   <h1 id="player-title" style="text-align: center; text-transform: uppercase;">Načítavam...</h1>
   
   <div class="stats-container">
+    <div class="stat-box">Pozícia<br><span id="current-rank">-</span></div>
     <div class="stat-box">Zápasy<br><span id="matches-played">0</span></div>
     <div class="stat-box">Výhry<br><span id="wins">0</span></div>
     <div class="stat-box">Prehry<br><span id="losses">0</span></div>
@@ -29,7 +30,6 @@
   <div class="profile-tables-grid" id="match-tables-container"></div>
 
 <script>
-  // Inicializácia Firebase
   const firebaseConfig = {
     apiKey: "AIzaSyBvjsbk35S43nORNCHfg4AJfVAxp3rr_gg",
     authDomain: "ligapinec.firebaseapp.com",
@@ -54,7 +54,6 @@
 
   const opponents = allPlayers.filter(p => p !== currentPlayer);
 
-  // Live sledovanie databázy
   db.collection("zapas").onSnapshot((snapshot) => {
     let matchData = {};
     snapshot.forEach((doc) => {
@@ -64,8 +63,52 @@
   });
 
   function drawProfile(matchData) {
+    // 1. Výpočet celkového poradia pre aktuálnu pozíciu
+    const stats = {};
+    allPlayers.forEach(p => stats[p] = { wins: 0, losses: 0, setsWon: 0, setsLost: 0 });
+
+    for (const key in matchData) {
+      const match = matchData[key];
+      stats[match.player1].setsWon += match.score1;
+      stats[match.player1].setsLost += match.score2;
+      stats[match.player2].setsWon += match.score2;
+      stats[match.player2].setsLost += match.score1;
+
+      if (match.score1 > match.score2) { stats[match.player1].wins++; stats[match.player2].losses++; }
+      else if (match.score2 > match.score1) { stats[match.player2].wins++; stats[match.player1].losses++; }
+    }
+
+    const leaderboard = allPlayers.map(player => ({ player, ...stats[player] }));
+    
+    leaderboard.sort((a, b) => {
+      if (b.setsWon !== a.setsWon) return b.setsWon - a.setsWon;
+
+      let aWinsH2H = 0, bWinsH2H = 0, aSetsH2H = 0, bSetsH2H = 0;
+      const sortedNames = [a.player, b.player].sort();
+      for (let i = 1; i <= 4; i++) {
+        const matchKey = `${sortedNames[0]}_${sortedNames[1]}_${i}`;
+        const match = matchData[matchKey];
+        if (match) {
+          let scoreA = match.player1 === a.player ? match.score1 : match.score2;
+          let scoreB = match.player1 === b.player ? match.score1 : match.score2;
+          aSetsH2H += scoreA; bSetsH2H += scoreB;
+          if (scoreA > scoreB) aWinsH2H++;
+          if (scoreB > scoreA) bWinsH2H++;
+        }
+      }
+      
+      if (bWinsH2H !== aWinsH2H) return bWinsH2H - aWinsH2H;
+      if (bSetsH2H !== aSetsH2H) return bSetsH2H - aSetsH2H;
+      if (b.wins !== a.wins) return b.wins - a.wins;
+      return a.player.localeCompare(b.player);
+    });
+
+    const myRankIndex = leaderboard.findIndex(p => p.player === currentPlayer);
+    document.getElementById("current-rank").textContent = (myRankIndex + 1) + ".";
+
+    // 2. Vykreslenie tabuliek pre súperov
     const container = document.getElementById("match-tables-container");
-    container.innerHTML = ''; // Vyčistenie pred prekreslením
+    container.innerHTML = ''; 
 
     let totalMatches = 0, totalWins = 0, totalLosses = 0, totalSetsWon = 0, totalSetsLost = 0;
 
@@ -87,10 +130,30 @@
       `;
       
       const sorted = [currentPlayer, opponent].sort();
+      let matchesBetween = [];
       
+      // Zozbieranie všetkých odohraných zápasov medzi týmito dvoma
       for (let i = 1; i <= 4; i++) {
         const key = `${sorted[0]}_${sorted[1]}_${i}`;
-        const match = matchData[key];
+        if (matchData[key]) {
+          matchesBetween.push(matchData[key]);
+        }
+      }
+
+      // Zoradenie zápasov chronologicky (od najstaršieho po najnovší)
+      matchesBetween.sort((a, b) => {
+        let timeA = a.timestamp ? a.timestamp.toMillis() : 0;
+        let timeB = b.timestamp ? b.timestamp.toMillis() : 0;
+        let dateA = a.date ? new Date(a.date).getTime() : timeA;
+        let dateB = b.date ? new Date(b.date).getTime() : timeB;
+        
+        if (dateA === dateB) return timeA - timeB; 
+        return dateA - dateB;
+      });
+
+      // Vykreslenie presne 4 riadkov
+      for (let i = 0; i < 4; i++) {
+        const match = matchesBetween[i];
         
         if (match) {
           let myScore = match.player1 === currentPlayer ? match.score1 : match.score2;
@@ -98,15 +161,17 @@
           
           let displayDate = match.date;
           if(match.date) {
-            const d = new Date(match.date);
-            displayDate = `${String(d.getDate()).padStart(2, '0')}. ${String(d.getMonth() + 1).padStart(2, '0')}.`;
+            const parts = match.date.split('-');
+            if(parts.length === 3) {
+               displayDate = `${parts[2]}. ${parts[1]}. ${parts[0]}`;
+            }
           }
 
           let color = myScore > oppScore ? "var(--success)" : "var(--danger)";
 
           html += `
             <tr>
-              <td><span class="score-box">${displayDate} 📅</span></td>
+              <td><span class="score-box">${displayDate}</span></td>
               <td><span class="score-box" style="font-weight: bold; color: ${color};">${myScore} : ${oppScore}</span></td>
             </tr>
           `;
@@ -120,7 +185,7 @@
         } else {
           html += `
             <tr>
-              <td><span class="score-box empty-slot">dd. mm. 📅</span></td>
+              <td><span class="score-box empty-slot">dd. mm. rrrr</span></td>
               <td><span class="score-box empty-slot">napr. 3:1</span></td>
             </tr>
           `;
