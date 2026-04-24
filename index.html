@@ -83,7 +83,6 @@
   <button class="btn-reset-all" onclick="resetAllData()">⚠️ Vymazať všetky výsledky</button>
 
 <script>
-  // 1. INICIALIZÁCIA FIREBASE S TVOJIMI KĽÚČMI
   const firebaseConfig = {
     apiKey: "AIzaSyBvjsbk35S43nORNCHfg4AJfVAxp3rr_gg",
     authDomain: "ligapinec.firebaseapp.com",
@@ -115,7 +114,6 @@
       linksContainer.appendChild(li);
     });
 
-    // 2. LIVE SYNCHRONIZÁCIA: Ak niekto iný uloží zápas, tu sa to okamžite prekreslí!
     db.collection("zapas").onSnapshot((snapshot) => {
       let matchData = {};
       snapshot.forEach((doc) => {
@@ -153,7 +151,6 @@
     const scoreForSecond = (secondPlayer === p2) ? s2 : s1;
 
     try {
-      // Zistenie voľného čísla zápasu z Firebase
       const snapshot = await db.collection("zapas").get();
       let matchData = {};
       snapshot.forEach(doc => matchData[doc.id] = doc.data());
@@ -176,7 +173,6 @@
 
       const matchKey = `${firstPlayer}_${secondPlayer}_${matchNumber}`;
       
-      // Uloženie dokumentu do Firebase
       await db.collection("zapas").doc(matchKey).set({
         date: date, 
         player1: firstPlayer, 
@@ -187,7 +183,6 @@
         matchNumber: matchNumber 
       });
 
-      // Reset formulára
       document.getElementById('player1').selectedIndex = 0;
       document.getElementById('player2').selectedIndex = 0;
       document.getElementById('score1').selectedIndex = 0;
@@ -202,7 +197,6 @@
     }
   }
 
-  // Funkcia, ktorá sa volá automaticky pri každej zmene v databáze
   function drawTables(matchData) {
     const stats = {};
     players.forEach(p => stats[p] = { wins: 0, losses: 0, setsWon: 0, setsLost: 0, history: [] });
@@ -224,8 +218,10 @@
       else if (p2Won) { stats[match.player2].wins++; stats[match.player1].losses++; }
 
       let time = match.timestamp ? match.timestamp.toMillis() : 0;
-      stats[match.player1].history.push({ won: p1Won, time: time });
-      stats[match.player2].history.push({ won: p2Won, time: time });
+      let dateObj = match.date ? new Date(match.date).getTime() : time; // Zoberieme dátum odohratia
+      
+      stats[match.player1].history.push({ won: p1Won, sortTime: dateObj, backupTime: time });
+      stats[match.player2].history.push({ won: p2Won, sortTime: dateObj, backupTime: time });
     }
 
     const leaderboard = players.map(player => ({ player, ...stats[player] }));
@@ -267,8 +263,13 @@
       if (index === 1) medal = " 🥈";
       if (index === 2) medal = " 🥉";
 
-      stat.history.sort((a, b) => a.time - b.time);
-      let last5 = stat.history.slice(-5);
+      // ZMENA TU: Zoradenie od NAJNOVŠIEHO po najstarší, a zobratie prvých 5.
+      // Najnovší bude na ľavej strane (ako prvý element vo FORME).
+      stat.history.sort((a, b) => {
+        if (b.sortTime === a.sortTime) return b.backupTime - a.backupTime;
+        return b.sortTime - a.sortTime;
+      });
+      let last5 = stat.history.slice(0, 5);
       
       let formaHtml = `<div class="forma-container">`;
       last5.forEach(match => {
@@ -286,11 +287,15 @@
       tbody.appendChild(tr);
     });
 
-    // Vykreslenie posledných zápasov
+    // Zoradenie posledných zápasov - najnovšie dátumy hore
     matchesArray.sort((a, b) => {
       let timeA = a.timestamp ? a.timestamp.toMillis() : 0;
       let timeB = b.timestamp ? b.timestamp.toMillis() : 0;
-      return timeB - timeA;
+      let dateA = a.date ? new Date(a.date).getTime() : timeA;
+      let dateB = b.date ? new Date(b.date).getTime() : timeB;
+      
+      if (dateA === dateB) return timeB - timeA; // Ak je rovnaký dátum, radíme podľa času zápisu
+      return dateB - dateA;
     });
 
     const recentTbody = document.querySelector('#recent-matches-table tbody');
@@ -307,10 +312,13 @@
       let p1Name = match.score1 > match.score2 ? `<strong>${match.player1}</strong>` : match.player1;
       let p2Name = match.score2 > match.score1 ? `<strong>${match.player2}</strong>` : match.player2;
 
+      // Zobrazenie dátumu s rokom
       let displayDate = match.date;
       if(match.date) {
-        const d = new Date(match.date);
-        displayDate = `${String(d.getDate()).padStart(2, '0')}. ${String(d.getMonth() + 1).padStart(2, '0')}.`;
+        const parts = match.date.split('-');
+        if(parts.length === 3) {
+           displayDate = `${parts[2]}. ${parts[1]}. ${parts[0]}`;
+        }
       }
 
       tr.innerHTML = `
